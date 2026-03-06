@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Lanchonete</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+<h1>🍔 Top Lanchonete</h1>
+<button onclick="abrirCarrinho()">Carrinho (<span id="cartCount">0</span>)</button>
+</header>
+
+<section id="loginArea">
+<h2>Login do Cliente</h2>
+<input id="cpf" placeholder="CPF">
+<input id="nome" placeholder="Nome">
+<button onclick="login()">Entrar</button>
+</section>
+
+<section class="menu" id="menu"></section>
+
+<div id="cart" class="cart hidden">
+<h2>Seu Pedido</h2>
+<div id="cartItems"></div>
+
+<p>Total: R$ <span id="total">0</span></p>
+
+<select id="deliveryType">
+<option value="retirada">Retirada</option>
+<option value="entrega">Entrega</option>
+</select>
+
+<select id="payment">
+<option value="pix">PIX</option>
+<option value="entrega">Pagar na entrega</option>
+</select>
+
+<button onclick="finalizar()">Finalizar Pedido</button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

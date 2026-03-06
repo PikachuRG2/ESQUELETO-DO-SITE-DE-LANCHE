@@ -1,0 +1,9 @@
+
+body{font-family:Arial;background:#000;color:#fff;margin:0}
+header{display:flex;justify-content:space-between;padding:15px;background:#111}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;padding:20px}
+.card{background:#1a1a1a;padding:15px;border-radius:10px}
+.card img{width:100%;border-radius:10px}
+button{background:#ff7a00;border:none;padding:10px;color:white;border-radius:6px}
+.cart{position:fixed;right:0;top:0;background:#111;width:320px;height:100%;padding:20px;overflow:auto}
+.hidden{display:none}
