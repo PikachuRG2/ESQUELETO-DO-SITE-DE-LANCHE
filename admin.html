@@ -19,7 +19,7 @@
 <div id="painel" style="display:none">
 
 <h2>Pedidos em tempo real</h2>
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<div class="toolbar">
 <label>Status: 
 <label>Status: 
 <select id="statusFilter">
@@ -30,10 +30,32 @@
   <option value="Entregue">Entregue</option>
 </select>
 </label>
+<label>Ordenar:
+<select id="sortBy">
+  <option value="recente">Mais recentes</option>
+  <option value="antigo">Mais antigos</option>
+  <option value="status">Status</option>
+</select>
+</label>
+<label>Auto atualizar:
+<input type="checkbox" id="autoRefresh" checked>
+</label>
+<label>Intervalo:
+<select id="refreshMs">
+  <option value="2000">2s</option>
+  <option value="5000">5s</option>
+  <option value="10000">10s</option>
+</select>
+</label>
+<button id="refreshNow">Atualizar agora</button>
 <input id="search" placeholder="Buscar por nome ou CPF" style="flex:1;min-width:220px">
+<div id="kpis" class="kpis"></div>
+<div class="table">
+<div class="row header-row">
+  <div>Cliente</div><div>Total</div><div>Status</div><div>ETA</div><div>Pagamento</div><div class="actions">Ações</div>
 </div>
-<div id="filaStatus" style="margin:8px 0"></div>
 <div id="pedidos"></div>
+</div>
 
 <h2>Relatório diário</h2>
 <p>Data: <span id="reportDate"></span></p>

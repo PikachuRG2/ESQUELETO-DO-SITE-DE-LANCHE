@@ -7,3 +7,16 @@ header{display:flex;justify-content:space-between;padding:15px;background:#111}
 button{background:#ff7a00;border:none;padding:10px;color:white;border-radius:6px}
 .cart{position:fixed;right:0;top:0;background:#111;width:320px;height:100%;padding:20px;overflow:auto}
 .hidden{display:none}
+
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
+.kpi{background:#1a1a1a;padding:10px;border-radius:8px}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px}
+.badge.recebido{background:#333;color:#fff}
+.badge.preparando{background:#004d99;color:#fff}
+.badge.pronto{background:#2b8a3e;color:#fff}
+.badge.entregue{background:#555;color:#ddd}
+.table{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:1.5fr 0.7fr 0.8fr 0.7fr 0.8fr 1fr;align-items:center;background:#1a1a1a;padding:10px;border-radius:8px}
+.header-row{background:#111;font-weight:bold}
+.actions{display:flex;gap:8px;justify-content:flex-end}

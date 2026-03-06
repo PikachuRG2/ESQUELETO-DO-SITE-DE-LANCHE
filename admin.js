@@ -14,51 +14,68 @@ alert("Login inválido")
 
 }
 
+let timer=null, prevCount=0
 function carregar(){
-
-let prevCount=0
-setInterval(()=>{
-
-let pedidos=JSON.parse(localStorage.getItem("pedidos")||"[]")
-
-const search=document.getElementById("search").value||""
-const norm=s=> (s||"").toString().replace(/\D/g,"").toLowerCase()
-const filtra=p=>{
-  const nome=(p.cliente?.nome||"").toLowerCase()
-  const cpf=(p.cliente?.cpf||"")
-  const q=search.toLowerCase()
-  return !search || nome.includes(q) || norm(cpf).includes(norm(q))
+  const savedFiltro=localStorage.getItem('statusFilter'); if(savedFiltro){document.getElementById('statusFilter').value=savedFiltro}
+  const savedSearch=localStorage.getItem('search'); if(savedSearch){document.getElementById('search').value=savedSearch}
+  const savedSort=localStorage.getItem('sortBy'); if(savedSort){document.getElementById('sortBy').value=savedSort}
+  const savedMs=localStorage.getItem('refreshMs'); if(savedMs){document.getElementById('refreshMs').value=savedMs}
+  atualizarPainel()
+  iniciarAuto()
 }
-
-let div=document.getElementById("pedidos")
-div.innerHTML=""
-
-const filtro=document.getElementById("statusFilter").value
-const lista=(filtro==="todos"?pedidos:pedidos.filter(p=>p.status===filtro)).filter(filtra)
-atualizarFila(pedidos)
-lista.forEach(p=>{
-  const val=((p.grandTotal||p.total).toFixed? (p.grandTotal||p.total).toFixed(2) : p.grandTotal||p.total)
-  const eta= calcularETA(p, pedidos)
-  div.innerHTML+=`<div style="margin-bottom:8px">
-  <p>${p.cliente?.nome||""} - R$${val} - ${p.status} - ETA: ${eta}</p>
-  <label>Alterar: 
-    <select onchange="alterarStatus('${p.id||""}', this.value)">
-      <option ${p.status==="Recebido"?"selected":""}>Recebido</option>
-      <option ${p.status==="Preparando"?"selected":""}>Preparando</option>
-      <option ${p.status==="Pronto"?"selected":""}>Pronto</option>
-      <option ${p.status==="Entregue"?"selected":""}>Entregue</option>
-    </select>
-  </label>
-  <button onclick="printPedido(${JSON.stringify(p).replace(/"/g,'&quot;')})">Imprimir</button>
-  </div>`
-})
-
-if(pedidos.length>prevCount){tocarSom()}
-prevCount=pedidos.length
-
-atualizarRelatorio(pedidos)
-},2000)
-
+function iniciarAuto(){
+  const auto=document.getElementById('autoRefresh').checked
+  const ms=parseInt(document.getElementById('refreshMs').value)
+  if(timer){clearInterval(timer); timer=null}
+  if(auto){timer=setInterval(atualizarPainel,ms)}
+  localStorage.setItem('refreshMs',String(ms))
+}
+function atualizarPainel(){
+  let pedidos=JSON.parse(localStorage.getItem("pedidos")||"[]")
+  const search=document.getElementById("search").value||""
+  const norm=s=> (s||"").toString().replace(/\D/g,"").toLowerCase()
+  const filtra=p=>{
+    const nome=(p.cliente?.nome||"").toLowerCase()
+    const cpf=(p.cliente?.cpf||"")
+    const q=search.toLowerCase()
+    return !search || nome.includes(q) || norm(cpf).includes(norm(q))
+  }
+  const filtro=document.getElementById("statusFilter").value
+  localStorage.setItem('statusFilter',filtro)
+  localStorage.setItem('search',search)
+  const sortBy=document.getElementById("sortBy").value
+  localStorage.setItem('sortBy',sortBy)
+  const lista=(filtro==="todos"?pedidos:pedidos.filter(p=>p.status===filtro)).filter(filtra)
+  if(sortBy==='recente'){lista.sort((a,b)=>new Date(b.criadoEm)-new Date(a.criadoEm))}
+  else if(sortBy==='antigo'){lista.sort((a,b)=>new Date(a.criadoEm)-new Date(b.criadoEm))}
+  else if(sortBy==='status'){lista.sort((a,b)=>String(a.status).localeCompare(String(b.status)))}
+  renderKpis(pedidos)
+  const div=document.getElementById("pedidos")
+  div.innerHTML= lista.map(p=>{
+    const val=((p.grandTotal||p.total).toFixed? (p.grandTotal||p.total).toFixed(2) : p.grandTotal||p.total)
+    const eta= calcularETA(p, pedidos)
+    const badgeClass= String(p.status).toLowerCase()
+    const pagamento=p.pagamento||''
+    return `<div class="row">
+      <div>${p.cliente?.nome||""}</div>
+      <div>R$ ${val}</div>
+      <div><span class="badge ${badgeClass}">${p.status}</span></div>
+      <div>${eta}</div>
+      <div>${pagamento.toUpperCase()}</div>
+      <div class="actions">
+        <select onchange="alterarStatus('${p.id||""}', this.value)">
+          <option ${p.status==="Recebido"?"selected":""}>Recebido</option>
+          <option ${p.status==="Preparando"?"selected":""}>Preparando</option>
+          <option ${p.status==="Pronto"?"selected":""}>Pronto</option>
+          <option ${p.status==="Entregue"?"selected":""}>Entregue</option>
+        </select>
+        <button onclick="printPedido(${JSON.stringify(p).replace(/"/g,'&quot;')})">Imprimir</button>
+      </div>
+    </div>`
+  }).join("")
+  if(pedidos.length>prevCount){tocarSom()}
+  prevCount=pedidos.length
+  atualizarRelatorio(pedidos)
 }
 
 function tocarSom(){
@@ -145,4 +162,9 @@ function calcularETA(p,pedidos){
   return `${hh}:${mm}`
 }
 
-document.getElementById("search").addEventListener("input",()=>{})
+document.getElementById("search").addEventListener("input",atualizarPainel)
+document.getElementById("statusFilter").addEventListener("change",atualizarPainel)
+document.getElementById("sortBy").addEventListener("change",atualizarPainel)
+document.getElementById("autoRefresh").addEventListener("change",iniciarAuto)
+document.getElementById("refreshMs").addEventListener("change",iniciarAuto)
+document.getElementById("refreshNow").addEventListener("click",atualizarPainel)
