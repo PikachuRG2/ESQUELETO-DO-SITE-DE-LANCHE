@@ -7,6 +7,7 @@
 <title>Top Lanchonete</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 
@@ -17,7 +18,7 @@
 
 <section id="loginArea">
 <h2>Login do Cliente</h2>
-<input id="cpf" placeholder="CPF">
+<input id="cpf" placeholder="CPF" inputmode="numeric" maxlength="14">
 <input id="nome" placeholder="Nome">
 <button onclick="login()">Entrar</button>
 </section>
@@ -29,20 +30,37 @@
 <div id="cartItems"></div>
 
 <p>Total: R$ <span id="total">0</span></p>
+<p id="deliveryFeeRow" class="hidden">Entrega: R$ <span id="deliveryFee">0</span></p>
+<p id="grandTotalRow" class="hidden">Total com entrega: R$ <span id="grandTotal">0</span></p>
 
 <select id="deliveryType">
 <option value="retirada">Retirada</option>
 <option value="entrega">Entrega</option>
 </select>
 
+<div id="addressRow" class="hidden" style="margin-top:10px">
+<input id="address" placeholder="Endereço para entrega">
+</div>
+<p id="addressMsg" class="hidden" style="color:#ff7a00;margin-top:6px"></p>
+<div id="map" class="hidden" style="height:250px;margin-top:10px"></div>
+
 <select id="payment">
 <option value="pix">PIX</option>
 <option value="entrega">Pagar na entrega</option>
 </select>
 
+<div style="display:flex;gap:10px;margin-top:10px">
 <button onclick="finalizar()">Finalizar Pedido</button>
+<button onclick="enviarWhatsApp()">Enviar pelo WhatsApp</button>
+</div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js').catch(()=>{})
+}
+</script>
 </body>
 </html>

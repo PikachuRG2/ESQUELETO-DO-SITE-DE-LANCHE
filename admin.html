@@ -19,8 +19,29 @@
 <div id="painel" style="display:none">
 
 <h2>Pedidos em tempo real</h2>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<label>Status: 
+<label>Status: 
+<select id="statusFilter">
+  <option value="todos">Todos</option>
+  <option value="Recebido">Recebido</option>
+  <option value="Preparando">Preparando</option>
+  <option value="Pronto">Pronto</option>
+  <option value="Entregue">Entregue</option>
+</select>
+</label>
+<input id="search" placeholder="Buscar por nome ou CPF" style="flex:1;min-width:220px">
+</div>
+<div id="filaStatus" style="margin:8px 0"></div>
 <div id="pedidos"></div>
 
+<h2>Relatório diário</h2>
+<p>Data: <span id="reportDate"></span></p>
+<p>Total de pedidos: <span id="reportCount">0</span></p>
+<p>Vendas: R$ <span id="reportTotal">0</span></p>
+<button onclick="imprimirDia()">Imprimir relatório</button>
+
+<div id="printArea" class="hidden"></div>
 </div>
 
 <script src="admin.js"></script>
