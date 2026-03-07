@@ -3,8 +3,10 @@ function login(){
 
 let u=document.getElementById("user").value
 let p=document.getElementById("pass").value
+let su=localStorage.getItem("adminUser")||"admin"
+let sp=localStorage.getItem("adminPass")||"123456"
 
-if(u=="admin" && p=="123456"){
+if(u==su && p==sp){
 document.getElementById("login").style.display="none"
 document.getElementById("painel").style.display="block"
 carregar()
@@ -14,6 +16,19 @@ alert("Login inválido")
 
 }
 
+function toggleRegister(){
+  const r=document.getElementById("register")
+  r.classList.toggle("hidden")
+}
+function register(){
+  const u=document.getElementById("userReg").value
+  const p=document.getElementById("passReg").value
+  if(!u||!p){alert("Informe usuário e senha");return}
+  localStorage.setItem("adminUser",u)
+  localStorage.setItem("adminPass",p)
+  alert("Registro salvo")
+  document.getElementById("register").classList.add("hidden")
+}
 let timer=null, prevCount=0
 function carregar(){
   const savedFiltro=localStorage.getItem('statusFilter'); if(savedFiltro){document.getElementById('statusFilter').value=savedFiltro}

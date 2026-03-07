@@ -16,6 +16,8 @@ const CONFIG={
   PIX_NOME:"TOP LANCHONETE",
   PIX_CIDADE:"SAOPAULO",
   PIX_DESC:"PEDIDO",
+  CIDADE:"São Paulo",
+  UF:"SP",
   LOJA_COORD:{lat:-23.55052,lng:-46.633308},
   PRECO_KM:2,
   MIN_ENTREGA:5
@@ -44,10 +46,14 @@ cpf=mascaraCPF(cpf)
 if(!validaCPF(cpf)){alert("CPF inválido");return}
 if(!nome){alert("Informe seu nome");return}
 
-cliente={cpf,nome}
+const existente=localStorage.getItem("cliente")
+let end=""
+try{ if(existente){ end=JSON.parse(existente).endereco||"" } }catch(e){}
+cliente={cpf,nome,endereco:end}
 localStorage.setItem("cliente",JSON.stringify(cliente))
 
 alert("Login realizado")
+updateHeaderProfile()
 }
 
 function add(i){
@@ -107,7 +113,14 @@ function finalizar(){
 let total=document.getElementById("total").innerText
 let pagamento=document.getElementById("payment").value
 let tipoEntrega=document.getElementById("deliveryType").value
-let endereco=document.getElementById("address").value||""
+let endereco=document.getElementById("address").value||cliente?.endereco||""
+if(tipoEntrega==="entrega"){
+  if(!endereco){
+    const msg=document.getElementById('addressMsg'); msg.classList.remove('hidden'); msg.innerText='Preencha seu endereço!'
+    alert('Preencha seu endereço!')
+    return
+  }
+}
 
 let pedidos=JSON.parse(localStorage.getItem("pedidos")||"[]")
 
@@ -143,7 +156,12 @@ updateCart()
 
 function enviarWhatsApp(){
   let tipoEntrega=document.getElementById("deliveryType").value
-  let endereco=document.getElementById("address").value||""
+  let endereco=document.getElementById("address").value||cliente?.endereco||""
+  if(tipoEntrega==="entrega" && !endereco){
+    const msg=document.getElementById('addressMsg'); msg.classList.remove('hidden'); msg.innerText='Preencha seu endereço!'
+    alert('Preencha seu endereço!')
+    return
+  }
   let pagamento=document.getElementById("payment").value
   let total=document.getElementById("total").innerText
   let texto=`Pedido - ${CONFIG.PIX_NOME}\nCliente: ${cliente?cliente.nome:""}\nCPF: ${cliente?cliente.cpf:""}\nItens:\n${carrinho.map(i=>`- ${i.nome} (R$ ${i.preco})`).join("\n")}\nSubtotal: R$ ${total}\nEntrega: ${tipoEntrega=="entrega"?`R$ ${taxaEntrega} - ${endereco}`:"Retirada"}\nTotal: R$ ${(Number(total)+taxaEntrega).toFixed(2)}\nPagamento: ${pagamento.toUpperCase()}`
@@ -267,6 +285,7 @@ try{
 }catch(e){}
 
 render()
+updateHeaderProfile()
 
 let map=null, lojaMarker=null, clienteMarker=null, clienteCoord=null
 function initMap(){
@@ -320,3 +339,158 @@ async function calcularTaxaPorRota(coord){
     throw new Error('no route')
   }
 }
+
+function abrirPerfil(){
+  const m=document.getElementById('perfilModal')
+  document.getElementById('perfilNome').value=cliente?.nome||''
+  document.getElementById('perfilCpf').value=cliente?.cpf||''
+  document.getElementById('perfilEndereco').value=cliente?.endereco||''
+  m.classList.remove('hidden')
+}
+function fecharPerfil(){
+  document.getElementById('perfilModal').classList.add('hidden')
+}
+function salvarPerfil(){
+  const nome=document.getElementById('perfilNome').value
+  const cpf=mascaraCPF(document.getElementById('perfilCpf').value)
+  const endereco=document.getElementById('perfilEndereco').value
+  if(!nome||!validaCPF(cpf)||!endereco){alert('Preencha nome, CPF válido e endereço');return}
+  cliente={nome,cpf,endereco}
+  localStorage.setItem('cliente',JSON.stringify(cliente))
+  const addr=document.getElementById('address')
+  if(addr){addr.value=endereco}
+  fecharPerfil()
+  updateHeaderProfile()
+}
+
+function initials(n){
+  if(!n) return '?'
+  const parts=n.trim().split(/\s+/)
+  const a=parts[0]?.[0]||''
+  const b=parts[1]?.[0]||''
+  return (a+b||a||'?').toUpperCase()
+}
+function updateHeaderProfile(){
+  const av=document.getElementById('avatar')
+  const sum=document.getElementById('profileSummary')
+  if(av){av.innerText=initials(cliente?.nome||'')}
+  const nome=cliente?.nome||'Visitante'
+  const end=cliente?.endereco?'Endereço: '+cliente.endereco:'Sem endereço'
+  if(sum){sum.innerText=`${nome} • ${end}`}
+}
+
+function sair(){
+  cliente=null
+  localStorage.removeItem('cliente')
+  updateHeaderProfile()
+  const addr=document.getElementById('address'); if(addr){addr.value=''}
+  const msg=document.getElementById('addressMsg'); if(msg){msg.classList.add('hidden'); msg.innerText=''}
+  fecharPerfil()
+}
+
+function mascaraCEP(v){
+  v=v.replace(/\D/g,'')
+  v=v.replace(/(\d{5})(\d)/,'$1-$2')
+  return v
+}
+function cepValido(cep){
+  return /^\d{5}-?\d{3}$/.test(cep)
+}
+async function buscaCEP(cep){
+  const limpo=cep.replace(/\D/g,'')
+  const r=await fetch(`https://viacep.com.br/ws/${limpo}/json/`)
+  const j=await r.json()
+  if(j && !j.erro){
+    const texto=[j.logradouro,j.bairro,`${j.localidade}/${j.uf}`].filter(Boolean).join(', ')
+    return texto
+  }
+  throw new Error('cep')
+}
+
+const perfilCep=document.getElementById('perfilCep')
+if(perfilCep){
+  perfilCep.addEventListener('input',()=>{perfilCep.value=mascaraCEP(perfilCep.value)})
+  perfilCep.addEventListener('blur',async ()=>{
+    const cep=perfilCep.value
+    if(!cepValido(cep)) return
+    try{
+      const texto=await buscaCEP(cep)
+      const end=document.getElementById('perfilEndereco')
+      if(end){end.value=texto}
+      const addr=document.getElementById('address'); if(addr){addr.value=texto}
+      geocodeAddress()
+    }catch(e){}
+  })
+}
+const cepCarrinho=document.getElementById('cep')
+if(cepCarrinho){
+  cepCarrinho.addEventListener('input',()=>{cepCarrinho.value=mascaraCEP(cepCarrinho.value)})
+  cepCarrinho.addEventListener('blur',async ()=>{
+    const cep=cepCarrinho.value
+    if(!cepValido(cep)){
+      const msg=document.getElementById('addressMsg'); msg.classList.remove('hidden'); msg.innerText='CEP inválido'
+      return
+    }
+    try{
+      const texto=await buscaCEP(cep)
+      const addr=document.getElementById('address'); if(addr){addr.value=texto}
+      const msg=document.getElementById('addressMsg'); msg.classList.add('hidden'); msg.innerText=''
+      geocodeAddress()
+    }catch(e){
+      const msg=document.getElementById('addressMsg'); msg.classList.remove('hidden'); msg.innerText='CEP não encontrado'
+    }
+  })
+}
+
+let viacepMap={}
+async function buscaRuas(q){
+  if(!q||q.length<3) return []
+  const url=`https://viacep.com.br/ws/${encodeURIComponent(CONFIG.UF)}/${encodeURIComponent(CONFIG.CIDADE)}/${encodeURIComponent(q)}/json/`
+  const r=await fetch(url)
+  const j=await r.json()
+  if(!Array.isArray(j)) return []
+  return j
+}
+function wireAutocompleteRua(ruaId,bairroId,cepId,endId,numId){
+  const ruaEl=document.getElementById(ruaId)
+  const bairroEl=document.getElementById(bairroId)
+  const cepEl=document.getElementById(cepId)
+  const endEl=document.getElementById(endId)
+  const numEl=numId?document.getElementById(numId):null
+  if(!ruaEl||!window.Awesomplete) return
+  const aw=new Awesomplete(ruaEl,{minChars:3,autoFirst:true})
+  ruaEl.addEventListener('input',async ()=>{
+    const res=await buscaRuas(ruaEl.value)
+    viacepMap={}
+    const list=res.map(x=>{
+      const lbl=`${x.logradouro} • ${x.bairro||''} • ${x.cep}`
+      viacepMap[lbl]=x
+      return lbl
+    })
+    aw.list=list
+  })
+  ruaEl.addEventListener('awesomplete-selectcomplete',e=>{
+    const lbl=e.text.value
+    const x=viacepMap[lbl]
+    if(!x) return
+    if(bairroEl) bairroEl.value=x.bairro||''
+    if(cepEl) {cepEl.value=mascaraCEP(x.cep||''); cepEl.dispatchEvent(new Event('blur'))}
+    if(endEl){
+      const num=numEl? (numEl.value||'') : ''
+      const txt=[x.logradouro,num?`nº ${num}`:'',x.bairro].filter(Boolean).join(', ')
+      endEl.value=txt
+      geocodeAddress()
+    }
+  })
+  if(numEl){
+    numEl.addEventListener('blur',()=>{
+      if(endEl && ruaEl.value){
+        const txt=[ruaEl.value, numEl.value?`nº ${numEl.value}`:'', bairroEl?bairroEl.value:'' ].filter(Boolean).join(', ')
+        endEl.value=txt
+        geocodeAddress()
+      }
+    })
+  }
+}
+wireAutocompleteRua('rua','bairro','cep','address','numero')
+wireAutocompleteRua('perfilRua','perfilBairro','perfilCep','perfilEndereco','perfilNumero')

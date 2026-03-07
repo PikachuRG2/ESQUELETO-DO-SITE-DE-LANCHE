@@ -7,6 +7,8 @@ header{display:flex;justify-content:space-between;padding:15px;background:#111}
 button{background:#ff7a00;border:none;padding:10px;color:white;border-radius:6px}
 .cart{position:fixed;right:0;top:0;background:#111;width:320px;height:100%;padding:20px;overflow:auto}
 .hidden{display:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6)}
+.avatar{width:32px;height:32px;border-radius:50%;background:#ff7a00;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
 
 .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}

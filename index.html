@@ -8,12 +8,18 @@
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css">
 </head>
 <body>
 
 <header>
 <h1>🍔 Top Lanchonete</h1>
+<div style="display:flex;gap:10px;align-items:center">
+<div id="avatar" class="avatar" onclick="abrirPerfil()">?</div>
+<span id="profileSummary"></span>
+<button onclick="abrirPerfil()">👤 Perfil</button>
 <button onclick="abrirCarrinho()">Carrinho (<span id="cartCount">0</span>)</button>
+</div>
 </header>
 
 <section id="loginArea">
@@ -39,6 +45,10 @@
 </select>
 
 <div id="addressRow" class="hidden" style="margin-top:10px">
+<input id="cep" placeholder="CEP" inputmode="numeric" maxlength="9" style="margin-bottom:8px">
+<input id="rua" class="awesomplete" placeholder="Rua" style="margin-bottom:8px">
+<input id="numero" placeholder="Número" style="margin-bottom:8px">
+<input id="bairro" placeholder="Bairro" style="margin-bottom:8px">
 <input id="address" placeholder="Endereço para entrega">
 </div>
 <p id="addressMsg" class="hidden" style="color:#ff7a00;margin-top:6px"></p>
@@ -55,7 +65,24 @@
 </div>
 </div>
 
+<div id="perfilModal" class="hidden" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#111;padding:20px;border-radius:10px;width:320px;max-width:90%">
+<h3>Perfil</h3>
+<input id="perfilNome" placeholder="Nome" style="width:100%;margin-bottom:8px">
+<input id="perfilCpf" placeholder="CPF" inputmode="numeric" maxlength="14" style="width:100%;margin-bottom:8px">
+<input id="perfilCep" placeholder="CEP" inputmode="numeric" maxlength="9" style="width:100%;margin-bottom:8px">
+<input id="perfilRua" class="awesomplete" placeholder="Rua" style="width:100%;margin-bottom:8px">
+<input id="perfilNumero" placeholder="Número" style="width:100%;margin-bottom:8px">
+<input id="perfilBairro" placeholder="Bairro" style="width:100%;margin-bottom:8px">
+<input id="perfilEndereco" placeholder="Endereço" style="width:100%;margin-bottom:8px">
+<div style="display:flex;gap:8px;justify-content:flex-end">
+<button onclick="sair()">Sair</button>
+<button onclick="salvarPerfil()">Salvar</button>
+<button onclick="fecharPerfil()">Fechar</button>
+</div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
 <script src="app.js"></script>
 <script>
 if('serviceWorker' in navigator){
